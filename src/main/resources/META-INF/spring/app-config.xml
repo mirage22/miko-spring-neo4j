@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+                http://www.springframework.org/schema/beans
+                http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/context
+		        http://www.springframework.org/schema/context/spring-context.xsd
+		        http://www.springframework.org/schema/mvc
+                http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                http://www.springframework.org/schema/tx
+		        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <import resource="classpath:/datasource/neo4j-config.xml" />
+
+    <!--  Traditional configuration using XML only.  Set "xml" profile in web.xml -->
+    <mvc:annotation-driven content-negotiation-manager="cnManager"/>
+
+    <!-- Simple strategy: only path extension is taken into account -->
+    <bean id="cnManager"
+          class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="ignoreAcceptHeader" value="true" />
+        <property name="defaultContentType" value="text/html" />
+
+        <property name="mediaTypes">
+            <map>
+                <entry key="html" value="text/html" />
+                <entry key="json" value="application/json" />
+                <entry key="xml" value="application/xml" />
+            </map>
+        </property>
+    </bean>
+
+    <!-- Configures a handler for serving static resources by forwarding to
+        the Servlet container's default Servlet. -->
+    <mvc:default-servlet-handler />
+
+    <!-- Import Redis Client setup -->
+    <!--<import resource="classpath:/datasource/redis-config.xml" />-->
+
+    <!-- Beans -->
+    <bean id="entityAService" class="com.miko.demo.neo4j.service.EntityAServiceImpl" />
+    <bean id="entityBService" class="com.miko.demo.neo4j.service.EntityBServiceImpl" />
+    <bean id="entityCService" class="com.miko.demo.neo4j.service.EntityCServiceImpl" />
+    <bean id="entityDService" class="com.miko.demo.neo4j.service.EntityDServiceImpl" />
+    <!-- End Beans -->
+
+    <!--<bean id="graphDatabaseService" class="org.neo4j.kernel.EmbeddedGraphDatabase" destroy-method="shutdown">-->
+        <!--<constructor-arg value="target/graph.db" />-->
+    <!--</bean>-->
+    <bean id="graphDatabaseService" class="org.springframework.data.neo4j.rest.SpringRestGraphDatabase">
+        <constructor-arg index="0" value="http://localhost:7474/db/data"></constructor-arg>
+    </bean>
+</beans>
+
