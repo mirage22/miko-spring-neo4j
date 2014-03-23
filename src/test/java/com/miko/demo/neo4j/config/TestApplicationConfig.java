@@ -1,6 +1,8 @@
 package com.miko.demo.neo4j.config;
 
+import com.miko.demo.neo4j.util.Neo4JConsts;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.impl.util.FileUtils;
 import org.springframework.context.annotation.Bean;
@@ -45,13 +47,13 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROT
 
 @Configuration
 @EnableTransactionManagement
-public class TestApplicationConfig extends ApplicationConfig{
+public class TestApplicationConfig extends ApplicationConfig implements Neo4JConsts{
     @Bean(destroyMethod = "shutdown")
     @Scope(SCOPE_PROTOTYPE)
     public GraphDatabaseService graphDatabaseService() {
         try {
-            FileUtils.deleteRecursively(new File("target/test-db"));
-            return new EmbeddedGraphDatabase("target/test-db");
+            FileUtils.deleteRecursively(new File(NEO4J_DB));
+            return new GraphDatabaseFactory().newEmbeddedDatabase(NEO4J_DB);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

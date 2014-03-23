@@ -1,6 +1,12 @@
 package com.miko.demo.neo4j.config;
 
+import com.miko.demo.neo4j.util.Neo4JConsts;
+import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.schema.IndexDefinition;
+import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -41,10 +47,24 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan
 @ImportResource("classpath:/META-INF/spring/app-config.xml")
 @EnableTransactionManagement
-public class ApplicationConfig {
+public class ApplicationConfig implements Neo4JConsts {
 
     @Bean(destroyMethod = "shutdown")
     public GraphDatabaseService graphDatabaseService() {
-        return new EmbeddedGraphDatabase("target/graph.db");
+
+        GraphDatabaseService graphDb =  new GraphDatabaseFactory().newEmbeddedDatabase(NEO4J_DB);
+
+        IndexDefinition indexDefinition;
+        try ( Transaction tx = graphDb.beginTx() )
+        {
+            Schema schema = graphDb.schema();
+            indexDefinition = schema.indexFor( DynamicLabel.label("EntityA") )
+                    .on( "name" )
+                    .create();
+            tx.success();
+        }
+
+
+        return graphDb;
     }
 }
